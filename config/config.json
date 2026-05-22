@@ -1,0 +1,5 @@
+{
+  "solr_url": "http://localhost:8983/solr/new_open_data",
+  "ollama_url": "http://localhost:11434/api/generate",
+  "ollama_model": "mymodel-optimized"
+}

@@ -1,0 +1,5 @@
+﻿FROM llama3.2:latest
+
+PARAMETER num_ctx 512
+PARAMETER num_predict 128
+PARAMETER num_gpu 99
