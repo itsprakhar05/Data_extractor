@@ -1,5 +1,20 @@
+
+
 {
-  "solr_url": "http://localhost:8983/solr/new_open_data",
-  "ollama_url": "http://localhost:11434/api/generate",
-  "ollama_model": "mymodel-optimized"
+  "solr_url":          "http://localhost:8983/solr/new_open_data",
+  "solr_signals_url":  "http://localhost:8983/solr/signals",
+  "ollama_url":        "http://localhost:11434/api/generate",
+  "ollama_model":      "mymodel-optimized",
+  "chunk_target_words": 300,
+  "ollama_options": {
+    "num_ctx":     512,
+    "num_predict": 200,
+    "num_gpu":     20,
+    "num_thread":  8,
+    "temperature": 0.1,
+    "low_vram":    true
+  }
 }
+
+
+

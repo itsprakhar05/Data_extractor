@@ -1,23 +1,52 @@
-fastapi==0.111.0
-uvicorn==0.30.1
-python-multipart==0.0.9
-pydantic==2.7.1
-pydantic-settings==2.2.1
-PyYAML==6.0.1
+# fastapi==0.111.0
+# uvicorn==0.30.1
+# python-multipart==0.0.9
+# pydantic==2.7.1
+# pydantic-settings==2.2.1
+# PyYAML==6.0.1
 
-# PDF parsing
-opendataloader-pdf         # OpenDataLoader / open-parse library
-pypdf==4.2.0
+# # PDF parsing
+# opendataloader-pdf         # OpenDataLoader / open-parse library
+# pypdf==4.2.0
 
-# Solr
-pysolr==3.10.0
-requests==2.32.2
+# # Solr
+# pysolr==3.10.0
+# requests==2.32.2
 
-# Ollama
-# ollama
+# # Ollama
+# # ollama
 
+
+# # Utilities
+# python-dotenv==1.0.1
+# loguru==0.7.2
+# tenacity==8.3.0
+
+
+
+
+# Core
+fastapi
+uvicorn
+pysolr
+requests
+pathlib
+
+# PDF processing
+opendataloader-pdf
+
+# Embeddings + re-ranking
+sentence-transformers   # covers SentenceTransformer + CrossEncoder
+
+# Extractive QA
+transformers
+torch                   # CPU-only fine for DistilBERT; GPU used for Llama3
+
+# NLP
+spacy                   # run: python -m spacy download en_core_web_sm
+yake
+pyspellchecker
 
 # Utilities
-python-dotenv==1.0.1
-loguru==0.7.2
-tenacity==8.3.0
+pydantic
+python-multipart        # needed for FastAPI file uploads

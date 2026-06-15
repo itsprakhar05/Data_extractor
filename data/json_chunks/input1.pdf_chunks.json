@@ -1,7 +1,7 @@
 [
   {
     "id": "input1.pdf_p0_c0",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 0,
@@ -393,11 +393,24 @@
       -0.037920430302619934
     ],
     "char_count": 1563,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "GEAR COMPLETE, LANDING GEAR, MAIN LANDING, Assembly Complete, England Telephone, COMPLETE, Shock Strut, GEAR, Strut Assembly, LANDING",
+    "entities": [
+      "PERSONS:Cheltenham Road",
+      "PERSONS:Strut Dressings",
+      "PERSONS:Strut Assembly",
+      "PERSONS:Complete LH",
+      "PERSONS:Strut Dressings LH",
+      "GPES:Gloucester",
+      "DATES:1452",
+      "DATES:10-355803-001",
+      "ORGS:Airbus",
+      "ORGS:Safran Landing Systems"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"persons\": [\"Cheltenham Road\", \"Strut Dressings\", \"Strut Assembly\", \"Complete LH\", \"Strut Dressings LH\"], \"gpes\": [\"Gloucester\"], \"dates\": [\"1452\", \"10-355803-001\"], \"orgs\": [\"Airbus\", \"Safran Landing Systems\"]}}"
   },
   {
     "id": "input1.pdf_p0_c1",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 1,
@@ -789,11 +802,13 @@
       -0.07421107590198517
     ],
     "char_count": 10,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": true}"
+    "keywords": "",
+    "entities": [],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": true, \"entities\": {}}"
   },
   {
     "id": "input1.pdf_p0_c2",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 2,
@@ -1185,11 +1200,16 @@
       0.015702303498983383
     ],
     "char_count": 1403,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "SUBSEQUENT REVISION, SAFRAN LANDING, LANDING SYSTEMS, PAGE DATES, REVISION PAGE, LANDING, SAFRAN, information contained, SYSTEMS, Service Bulletin",
+    "entities": [
+      "DATES:2019",
+      "ORGS:Safran Landing Systems"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"dates\": [\"2019\"], \"orgs\": [\"Safran Landing Systems\"]}}"
   },
   {
     "id": "input1.pdf_p0_c3",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 3,
@@ -1581,11 +1601,30 @@
       -0.045453839004039764
     ],
     "char_count": 1758,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "Safran Landing, Landing Systems, Service Bulletin, Landing, Safran, Systems, Maintenance Manual, Component Maintenance, Systems landing, Service",
+    "entities": [
+      "ORGS:Safran Landing Systems UK Ltd Component",
+      "ORGS:Safran Landing Systems UK Ltd Modification Form No",
+      "ORGS:Process Specifications",
+      "ORGS:PCS",
+      "ORGS:the Safran Landing Systems Technical Publications",
+      "ORGS:- L. Publications Affected",
+      "ORGS:the Safran Landing Systems",
+      "ORGS:Safran Landing Systems",
+      "ORGS:Material Information\n\n\n- A. Material - Price and Availability",
+      "ORGS:the Safran Landing Systems Spare Parts Price Catalog",
+      "ORGS:CSC",
+      "PERSONS:Bulletin",
+      "PERSONS:Bulletin A350-32-P031",
+      "DATES:112981",
+      "DATES:the calendar year, ending December 31st 2019",
+      "GPES:SB"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"orgs\": [\"Safran Landing Systems UK Ltd Component\", \"Safran Landing Systems UK Ltd Modification Form No\", \"Process Specifications\", \"PCS\", \"the Safran Landing Systems Technical Publications\", \"- L. Publications Affected\", \"the Safran Landing Systems\", \"Safran Landing Systems\", \"Material Information\\n\\n\\n- A. Material - Price and Availability\", \"the Safran Landing Systems Spare Parts Price Catalog\", \"CSC\"], \"persons\": [\"Bulletin\", \"Bulletin A350-32-P031\"], \"dates\": [\"112981\", \"the calendar year, ending December 31st 2019\"], \"gpes\": [\"SB\"]}}"
   },
   {
     "id": "input1.pdf_p0_c4",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 4,
@@ -1977,11 +2016,17 @@
       -0.05002769082784653
     ],
     "char_count": 870,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "Interchangeability codes, Expendable part, design valid, number change, show basic, part, Interchangeability, Qualified Interchangeability, Expendable, Service Bulletin",
+    "entities": [
+      "ORGS:Interchangeability",
+      "ORGS:the Component Maintenance Manuals",
+      "DATES:2000"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"orgs\": [\"Interchangeability\", \"the Component Maintenance Manuals\"], \"dates\": [\"2000\"]}}"
   },
   {
     "id": "input1.pdf_p0_c5",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 5,
@@ -2373,11 +2418,13 @@
       -0.04384027421474457
     ],
     "char_count": 255,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": true}"
+    "keywords": "Part Price, Cotter Pin, Upper Cap, Lower Cap, Qty, Part, Cap, Keyword, Instructions, Disposition",
+    "entities": [],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": true, \"entities\": {}}"
   },
   {
     "id": "input1.pdf_p0_c6",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 6,
@@ -2769,11 +2816,24 @@
       -0.05841487646102905
     ],
     "char_count": 1814,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "cotter pins, Service Bulletin, cotter, Refer, pins, lower cap, cap, Install, service, Bulletin",
+    "entities": [
+      "ORGS:Accomplishment Instructions\n\n\nThe",
+      "ORGS:The Process Specifications",
+      "ORGS:PCS",
+      "ORGS:the Safran Landing Systems Technical Publications",
+      "ORGS:Airbus Service",
+      "ORGS:Apply",
+      "ORGS:ASSEMBLY",
+      "PERSONS:Bulletin A350-32-P031",
+      "DATES:32-13-06",
+      "DATES:55-3573319-00"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"orgs\": [\"Accomplishment Instructions\\n\\n\\nThe\", \"The Process Specifications\", \"PCS\", \"the Safran Landing Systems Technical Publications\", \"Airbus Service\", \"Apply\", \"ASSEMBLY\"], \"persons\": [\"Bulletin A350-32-P031\"], \"dates\": [\"32-13-06\", \"55-3573319-00\"]}}"
   },
   {
     "id": "input1.pdf_p0_c7",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 7,
@@ -3165,11 +3225,13 @@
       -0.022791123017668724
     ],
     "char_count": 270,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "Service Bulletin, Bulletin number, Series shock, dressings nameplate, gear records, strike number, related strike, shock strut, strut dressings, applicable aircraft",
+    "entities": [],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {}}"
   },
   {
     "id": "input1.pdf_p0_c8",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 8,
@@ -3561,11 +3623,13 @@
       -0.07421107590198517
     ],
     "char_count": 11,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": true}"
+    "keywords": "",
+    "entities": [],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": true, \"entities\": {}}"
   },
   {
     "id": "input1.pdf_p0_c9",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 9,
@@ -3957,11 +4021,23 @@
       -0.043728090822696686
     ],
     "char_count": 969,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": false}"
+    "keywords": "Cotter Pin, CMM, Landing Systems, Safran Landing, Target Bracket, image, images, Bogie Angle, Angle Target, Landing",
+    "entities": [
+      "PERSONS:Bulletin A350-32-P031",
+      "PERSONS:Bolt",
+      "PERSONS:Flat Washer",
+      "PERSONS:Pin MS24665-155",
+      "ORGS:Outboard - Location of Modification",
+      "ORGS:Safran Landing Systems",
+      "ORGS:Safran Landing Systems Services Contacts\n\n\nA. Refer",
+      "ORGS:the Safran Landing Systems",
+      "DATES:55-3573319-00"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": false, \"entities\": {\"persons\": [\"Bulletin A350-32-P031\", \"Bolt\", \"Flat Washer\", \"Pin MS24665-155\"], \"orgs\": [\"Outboard - Location of Modification\", \"Safran Landing Systems\", \"Safran Landing Systems Services Contacts\\n\\n\\nA. Refer\", \"the Safran Landing Systems\"], \"dates\": [\"55-3573319-00\"]}}"
   },
   {
     "id": "input1.pdf_p0_c10",
-    "doc_id": "5fb6ece8-59f7-4ccf-9d68-5d73cd4b0a04",
+    "doc_id": "2339ef70-1544-48c4-a649-820df05ea877",
     "source_file": "input1.pdf.pdf",
     "page_num": 0,
     "chunk_index": 10,
@@ -4353,6 +4429,50 @@
       -0.015147330239415169
     ],
     "char_count": 1837,
-    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"native-opendataloader-markdown\", \"is_table\": true}"
+    "keywords": "Safran Landing, Landing Systems, Original Equipment, Equipment Manufacturers, FRANCE Tel, Systems Services, Systems Canada, CANADA Tel, Tel, Safran",
+    "entities": [
+      "ORGS:Landing Systems Canada Inc.",
+      "ORGS:Landing Systems UK Ltd",
+      "ORGS:Landing Systems SAS Site Jean-Paul Béchat Inovel",
+      "ORGS:Vélizy - Villacoublay",
+      "ORGS:|Customer Support Centers",
+      "ORGS:AOG",
+      "ORGS:|For Americas",
+      "ORGS:Landing Systems Services",
+      "ORGS:Landing Systems",
+      "ORGS:Landing Systems Services Singapore Pte Ltd",
+      "ORGS:Loyang Industrial Estate SINGAPORE",
+      "ORGS:Landing Systems Services Americas SA de CV Av",
+      "ORGS:La Noria Parque Industrial Querétaro Carretera QRO-SLP",
+      "ORGS:Km",
+      "ORGS:QRO",
+      "ORGS:DINARD",
+      "ORGS:br><br>|",
+      "GPES:Ontario",
+      "GPES:Europe - Africa - Middle East",
+      "DATES:2G8",
+      "DATES:713821",
+      "DATES:78140",
+      "DATES:81 00",
+      "DATES:29 8770",
+      "DATES:6245",
+      "DATES:38838 9399",
+      "DATES:6542 3936",
+      "DATES:19 25",
+      "DATES:2 99",
+      "DATES:82",
+      "DATES:79",
+      "PERSONS:CANADA Tel",
+      "PERSONS:Parc Sud 7",
+      "PERSONS:FRANCE Tel",
+      "PERSONS:Tel",
+      "PERSONS:Overhaul",
+      "PERSONS:ENGLAND Tel",
+      "PERSONS:BP110 67124",
+      "PERSONS:Molsheim",
+      "PERSONS:28.5 Querétaro",
+      "PERSONS:Aéroport de Dinard-Pleurtuit-Saint-Malo Bâtiment"
+    ],
+    "metadata": "{\"file_type\": \"pdf\", \"parser\": \"opendataloader-markdown\", \"is_table\": true, \"entities\": {\"orgs\": [\"Landing Systems Canada Inc.\", \"Landing Systems UK Ltd\", \"Landing Systems SAS Site Jean-Paul Béchat Inovel\", \"Vélizy - Villacoublay\", \"|Customer Support Centers\", \"AOG\", \"|For Americas\", \"Landing Systems Services\", \"Landing Systems\", \"Landing Systems Services Singapore Pte Ltd\", \"Loyang Industrial Estate SINGAPORE\", \"Landing Systems Services Americas SA de CV Av\", \"La Noria Parque Industrial Querétaro Carretera QRO-SLP\", \"Km\", \"QRO\", \"DINARD\", \"br><br>|\"], \"gpes\": [\"Ontario\", \"Europe - Africa - Middle East\"], \"dates\": [\"2G8\", \"713821\", \"78140\", \"81 00\", \"29 8770\", \"6245\", \"38838 9399\", \"6542 3936\", \"19 25\", \"2 99\", \"82\", \"79\"], \"persons\": [\"CANADA Tel\", \"Parc Sud 7\", \"FRANCE Tel\", \"Tel\", \"Overhaul\", \"ENGLAND Tel\", \"BP110 67124\", \"Molsheim\", \"28.5 Querétaro\", \"Aéroport de Dinard-Pleurtuit-Saint-Malo Bâtiment\"]}}"
   }
 ]
