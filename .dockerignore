@@ -1,0 +1,9 @@
+frontend/
+node_modules/
+.venv
+__pycache__
+*.pyc
+.git
+.env
+mlops_tool_demo
+data/auth.db

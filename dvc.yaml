@@ -1,0 +1,55 @@
+# stages:
+
+#   extract:
+#     desc: "Convert raw PDFs to Markdown using opendataloader_pdf"
+#     cmd: python pipeline_run.py extract
+#     deps:
+#       - pipeline_run.py
+#       - data/uploads/
+#     outs:
+#       - data/temp_extraction/
+
+#   chunk:
+#     desc: "Split Markdown into table-aware JSON chunks (300-word target)"
+#     cmd: python pipeline_run.py chunk
+#     deps:
+#       - pipeline_run.py
+#       - data/temp_extraction/
+#     outs:
+#       - data/json_chunks/
+
+#   embed:
+#     desc: "Encode chunks with all-MiniLM-L6-v2 and attach content_vector"
+#     cmd: python pipeline_run.py embed
+#     deps:
+#       - pipeline_run.py
+#       - data/json_chunks/
+#     outs:
+#       - data/embedded_chunks/
+
+#   ingest:
+#     desc: "Upload embedded chunks to Solr (schema sync included)"
+#     cmd: python pipeline_run.py ingest
+#     deps:
+#       - pipeline_run.py
+#       - data/embedded_chunks/
+#     metrics:
+#       - data/metrics/ingest_metrics.json:
+#           cache: false
+
+
+
+
+stages:
+
+  extract:
+    cmd: python pipeline_run.py extract
+
+  chunk:
+    cmd: python pipeline_run.py chunk
+
+  embed:
+    cmd: python pipeline_run.py embed
+
+  ingest:
+    cmd: python pipeline_run.py ingest
