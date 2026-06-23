@@ -295,6 +295,9 @@ import pysolr
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 import opendataloader_pdf
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
 
 log = logging.getLogger("RAG_Pipeline")
 
@@ -307,7 +310,7 @@ class RagPipeline:
         self.solr = pysolr.Solr(self.solr_url, always_commit=True)
 
         # ✅ Groq API config
-        self.groq_api_key = self.config["groq_api_key"]
+        self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.groq_model = self.config["groq_model"]
         self.groq_url = "https://api.groq.com/openai/v1/chat/completions"
         
