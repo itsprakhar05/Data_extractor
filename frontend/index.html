@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenDataLoader · RAG Engine</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    /* ── Design tokens ── */
+    :root {
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface-2:   #1c2330;
+      --border:      #30363d;
+      --accent:      #6e40c9;
+      --accent-glow: #8b5cf6;
+      --accent-dim:  #3d2a72;
+      --text:        #e6edf3;
+      --text-muted:  #7d8590;
+      --text-dim:    #484f58;
+      --success:     #3fb950;
+      --danger:      #f85149;
+      --warning:     #d29922;
+      --mono:        'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --sans:        'Inter', system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      height: 100vh;
+      overflow: hidden;
+    }
+    #root { height: 100vh; display: flex; flex-direction: column; }
+
+    /* ── Typography ── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Auth page ── */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 0%, rgba(110,64,201,0.15) 0%, transparent 70%), var(--bg);
+    }
+    .auth-card {
+      width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 40px;
+    }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+    .auth-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .auth-logo-text {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .auth-logo-sub { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+    .auth-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+    .auth-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .form-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: var(--sans);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--text-dim); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+      font-family: var(--sans);
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: #fff; width: 100%; justify-content: center; padding: 12px; }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-danger { background: rgba(248,81,73,0.12); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .auth-switch {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .auth-switch button {
+      background: none; border: none; color: var(--accent-glow);
+      cursor: pointer; font-size: 13px; font-family: var(--sans);
+    }
+    .error-msg {
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.3);
+      color: var(--danger);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .success-msg {
+      background: rgba(63,185,80,0.1);
+      border: 1px solid rgba(63,185,80,0.3);
+      color: var(--success);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    /* ── App shell ── */
+    .shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-logo {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .sidebar-brand { font-size: 14px; font-weight: 600; }
+    .sidebar-brand-sub { font-size: 10px; color: var(--text-muted); font-family: var(--mono); }
+    .sidebar-nav { flex: 1; padding: 8px 8px; overflow-y: auto; }
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      padding: 12px 8px 6px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: background 0.12s, color 0.12s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: var(--sans);
+    }
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+    .nav-item.active { background: var(--accent-dim); color: var(--accent-glow); }
+    .nav-item svg { flex-shrink: 0; }
+    .sidebar-footer {
+      padding: 12px 8px;
+      border-top: 1px solid var(--border);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+    .user-avatar {
+      width: 28px; height: 28px;
+      background: var(--accent-dim);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-glow);
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-email { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Main content ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-title { font-size: 16px; font-weight: 600; }
+    .page-sub { font-size: 12px; color: var(--text-muted); }
+    .content { flex: 1; overflow-y: auto; padding: 28px; }
+
+    /* ── Query page ── */
+    .query-wrap { max-width: 860px; margin: 0 auto; }
+    .messages { display: flex; flex-direction: column; gap: 20px; margin-bottom: 24px; }
+    .message { display: flex; flex-direction: column; gap: 6px; }
+    .message-role {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .message.user .message-role { color: var(--accent-glow); }
+    .message-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .message.user .message-bubble {
+      background: var(--accent-dim);
+      border-color: rgba(110,64,201,0.4);
+    }
+    .message-bubble pre { font-family: var(--mono); font-size: 12px; white-space: pre-wrap; }
+    .streaming-cursor {
+      display: inline-block;
+      width: 2px; height: 14px;
+      background: var(--accent-glow);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.9s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    .query-box {
+      display: flex;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      align-items: flex-end;
+    }
+    .query-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--sans);
+      resize: none;
+      min-height: 24px;
+      max-height: 120px;
+      line-height: 1.5;
+    }
+    .query-input::placeholder { color: var(--text-dim); }
+    .send-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+    .send-btn:hover { opacity: 0.85; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .empty-state {
+      text-align: center;
+      padding: 60px 0;
+      color: var(--text-muted);
+    }
+    .empty-state svg { opacity: 0.3; margin-bottom: 16px; }
+    .empty-state h3 { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+    .empty-state p { font-size: 13px; }
+
+    /* ── Ingest page ── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 48px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 24px;
+    }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(110,64,201,0.05);
+    }
+    .drop-zone svg { opacity: 0.5; margin-bottom: 12px; }
+    .drop-zone h3 { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+    .drop-zone p { font-size: 13px; color: var(--text-muted); }
+    .upload-list { display: flex; flex-direction: column; gap: 10px; }
+    .upload-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .upload-item-icon {
+      width: 36px; height: 36px;
+      background: rgba(110,64,201,0.15);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-glow);
+      flex-shrink: 0;
+    }
+    .upload-item-info { flex: 1; min-width: 0; }
+    .upload-item-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .upload-item-meta { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+    .status-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      flex-shrink: 0;
+    }
+    .status-pending  { background: rgba(210,153,34,0.15);  color: var(--warning); }
+    .status-uploading{ background: rgba(110,64,201,0.15);  color: var(--accent-glow); }
+    .status-done     { background: rgba(63,185,80,0.15);   color: var(--success); }
+    .status-error    { background: rgba(248,81,73,0.15);   color: var(--danger); }
+    .progress-bar { height: 2px; background: var(--border); border-radius: 1px; margin-top: 6px; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.3s; }
+
+    /* ── Delete page ── */
+    .doc-list { display: flex; flex-direction: column; gap: 8px; }
+    .doc-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .doc-item-info { flex: 1; }
+    .doc-item-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+    .doc-item-meta { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+
+    /* ── Settings page ── */
+    .settings-section { margin-bottom: 32px; }
+    .settings-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .settings-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .settings-row-label { font-size: 13px; font-weight: 500; }
+    .settings-row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .tag {
+      font-size: 10px;
+      font-family: var(--mono);
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    /* ── Pulse loader ── */
+    .pulse { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+    .pulse span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+    .pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse-dot { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 9999;
+    }
+    .toast {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+      animation: slide-in 0.2s ease;
+      max-width: 320px;
+    }
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error   { border-left: 3px solid var(--danger); }
+    .toast.info    { border-left: 3px solid var(--accent); }
+    @keyframes slide-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* misc */
+    .divider { height: 1px; background: var(--border); margin: 24px 0; }
+    .code { font-family: var(--mono); font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; color: var(--accent-glow); }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Config ─────────────────────────────────────────────────────────────────
+const RAG_URL  = 'http://localhost:8000';  // Main FastAPI RAG server
+const AUTH_URL = 'http://localhost:8001';  // Auth server
+
+// ── Auth context ────────────────────────────────────────────────────────────
+function useAuth() {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('rag_token'));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) { setLoading(false); return; }
+    fetch(`${AUTH_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(u => setUser(u))
+      .catch(() => { localStorage.removeItem('rag_token'); setToken(null); })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const login = async (username, password) => {
+    const form = new URLSearchParams({ username, password });
+    const r = await fetch(`${AUTH_URL}/auth/login`, { method:'POST', body: form });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Login failed');
+    localStorage.setItem('rag_token', data.access_token);
+    setToken(data.access_token);
+    setUser(data.user);
+    return data.user;
+  };
+
+  const register = async (email, username, password) => {
+    const r = await fetch(`${AUTH_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, username, password })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Registration failed');
+    return data;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('rag_token');
+    setToken(null);
+    setUser(null);
+  };
+
+  return { user, token, loading, login, register, logout };
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────────
+function ToastContainer({ toasts }) {
+  return (
+    <div className="toast-container">
+      {toasts.map(t => (
+        <div key={t.id} className={`toast ${t.type}`}>
+          <span>{t.message}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function useToasts() {
+  const [toasts, setToasts] = useState([]);
+  const push = (message, type = 'info') => {
+    const id = Date.now();
+    setToasts(p => [...p, { id, message, type }]);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3500);
+  };
+  return { toasts, toast: push };
+}
+
+// ── Icons (inline SVG) ──────────────────────────────────────────────────────
+const Icon = ({ name, size = 16, color = 'currentColor' }) => {
+  const icons = {
+    search: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+    upload: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+    trash:  <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
+    file:   <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>,
+    settings:<svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+    logout: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+    send:   <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9 22,2"/></svg>,
+    bot:    <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>,
+    db:     <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+    check:  <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>,
+    x:      <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  };
+  return icons[name] || null;
+};
+
+// ── Auth pages ──────────────────────────────────────────────────────────────
+function AuthPage({ onLogin, onRegister }) {
+  const [mode, setMode] = useState('login');
+  const [form, setForm] = useState({ email:'', username:'', password:'' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const submit = async () => {
+    setError(''); setSuccess('');
+    if (!form.password || (mode === 'login' ? !form.username : !form.email || !form.username)) {
+      setError('Please fill in all fields.'); return;
+    }
+    setLoading(true);
+    try {
+      if (mode === 'login') {
+        await onLogin(form.username, form.password);
+      } else {
+        await onRegister(form.email, form.username, form.password);
+        setSuccess('Account created! You can now log in.');
+        setMode('login');
+        setForm({ email:'', username:'', password:'' });
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKey = e => { if (e.key === 'Enter') submit(); };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="auth-logo">
+          <div className="auth-logo-icon">⚡</div>
+          <div>
+            <div className="auth-logo-text">OpenDataLoader</div>
+            <div className="auth-logo-sub">RAG · SOLR · GROQ</div>
+          </div>
+        </div>
+        <div className="auth-title">{mode === 'login' ? 'Welcome back' : 'Create account'}</div>
+        <div className="auth-subtitle">
+          {mode === 'login' ? 'Sign in to access your knowledge base' : 'Start ingesting documents'}
+        </div>
+        {error && <div className="error-msg">{error}</div>}
+        {success && <div className="success-msg">{success}</div>}
+        {mode === 'register' && (
+          <div className="form-group">
+            <label className="form-label">Email</label>
+            <input className="form-input" type="email" placeholder="you@example.com"
+              value={form.email} onChange={e => set('email', e.target.value)} onKeyDown={handleKey} />
+          </div>
+        )}
+        <div className="form-group">
+          <label className="form-label">{mode === 'login' ? 'Username or Email' : 'Username'}</label>
+          <input className="form-input" type="text" placeholder={mode === 'login' ? 'Enter username or email' : 'Choose a username'}
+            value={form.username} onChange={e => set('username', e.target.value)} onKeyDown={handleKey} />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Password{mode === 'register' ? ' (min 8 chars)' : ''}</label>
+          <input className="form-input" type="password" placeholder="••••••••"
+            value={form.password} onChange={e => set('password', e.target.value)} onKeyDown={handleKey} />
+        </div>
+        <button className="btn btn-primary" onClick={submit} disabled={loading}>
+          {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+        </button>
+        <div className="auth-switch">
+          {mode === 'login' ? (
+            <>Don't have an account? <button onClick={() => { setMode('register'); setError(''); }}>Sign up</button></>
+          ) : (
+            <>Already have an account? <button onClick={() => { setMode('login'); setError(''); }}>Sign in</button></>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Query page ───────────────────────────────────────────────────────────────
+function QueryPage({ token }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [streaming, setStreaming] = useState(false);
+  const bottomRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const send = async () => {
+    const q = input.trim();
+    if (!q || streaming) return;
+    setInput('');
+    const userMsg = { role: 'user', content: q };
+    const assistantMsg = { role: 'assistant', content: '', streaming: true };
+    setMessages(p => [...p, userMsg, assistantMsg]);
+    setStreaming(true);
+
+    try {
+      const res = await fetch(`${RAG_URL}/api/v1/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ question: q })
+      });
+
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        // Parse SSE lines
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            full += data;
+            setMessages(p => {
+              const copy = [...p];
+              copy[copy.length - 1] = { role: 'assistant', content: full, streaming: true };
+              return copy;
+            });
+          } else if (line && !line.startsWith('data:')) {
+            // plain text stream (non-SSE)
+            full += line;
+            setMessages(p => {
+              const copy = [...p];
+              copy[copy.length - 1] = { role: 'assistant', content: full, streaming: true };
+              return copy;
+            });
+          }
+        }
+      }
+      setMessages(p => {
+        const copy = [...p];
+        copy[copy.length - 1] = { role: 'assistant', content: full || '(No response)', streaming: false };
+        return copy;
+      });
+    } catch (e) {
+      setMessages(p => {
+        const copy = [...p];
+        copy[copy.length - 1] = { role: 'assistant', content: `Error: ${e.message}`, streaming: false };
+        return copy;
+      });
+    } finally {
+      setStreaming(false);
+    }
+  };
+
+  const handleKey = e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  };
+
+  return (
+    <div className="query-wrap">
+      {messages.length === 0 ? (
+        <div className="empty-state">
+          <div><Icon name="bot" size={48} /></div>
+          <h3>Ask anything about your documents</h3>
+          <p>Upload PDFs first, then ask questions — the RAG engine will search and answer.</p>
+        </div>
+      ) : (
+        <div className="messages">
+          {messages.map((m, i) => (
+            <div key={i} className={`message ${m.role}`}>
+              <div className="message-role">{m.role === 'user' ? 'You' : 'RAG Engine'}</div>
+              <div className="message-bubble">
+                {m.content || (m.streaming ? <div className="pulse"><span/><span/><span/></div> : '')}
+                {m.streaming && m.content && <span className="streaming-cursor" />}
+              </div>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+      )}
+      <div className="query-box">
+        <textarea
+          ref={textareaRef}
+          className="query-input"
+          placeholder="Ask a question about your documents…"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKey}
+          rows={1}
+          style={{ height: 'auto' }}
+          onInput={e => { e.target.style.height='auto'; e.target.style.height = e.target.scrollHeight+'px'; }}
+        />
+        <button className="send-btn" onClick={send} disabled={!input.trim() || streaming}>
+          <Icon name="send" size={15} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Ingest page ──────────────────────────────────────────────────────────────
+function IngestPage({ token, authToken, toast }) {
+  const [files, setFiles] = useState([]);
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef(null);
+
+  const addFiles = (fileList) => {
+    const pdfs = Array.from(fileList).filter(f => f.name.endsWith('.pdf'));
+    if (pdfs.length === 0) { toast('Only PDF files are supported.', 'error'); return; }
+    const entries = pdfs.map(f => ({ file: f, status: 'pending', progress: 0, chunks: null, error: null }));
+    setFiles(p => [...p, ...entries]);
+  };
+
+  const uploadAll = async () => {
+    const pending = files.filter(f => f.status === 'pending');
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].status !== 'pending') continue;
+      setFiles(p => { const c=[...p]; c[i]={...c[i],status:'uploading',progress:30}; return c; });
+      const fd = new FormData();
+      fd.append('file', files[i].file);
+      try {
+        const res = await fetch(`${RAG_URL}/api/v1/ingest`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: fd
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'Upload failed');
+        setFiles(p => { const c=[...p]; c[i]={...c[i],status:'done',progress:100,chunks:data.chunks_created}; return c; });
+        // Log to auth server
+        if (authToken) {
+          fetch(`${AUTH_URL}/auth/log-upload`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${authToken}`},
+            body: JSON.stringify({ filename: files[i].file.name, chunks: data.chunks_created })
+          }).catch(() => {});
+        }
+        toast(`Ingested ${files[i].file.name} — ${data.chunks_created} chunks`, 'success');
+      } catch (e) {
+        setFiles(p => { const c=[...p]; c[i]={...c[i],status:'error',error:e.message}; return c; });
+        toast(`Failed: ${e.message}`, 'error');
+      }
+    }
+  };
+
+  const fmtSize = n => n > 1048576 ? (n/1048576).toFixed(1)+'MB' : (n/1024).toFixed(0)+'KB';
+
+  return (
+    <div style={{ maxWidth: 700 }}>
+      <div
+        className={`drop-zone ${dragOver ? 'drag-over' : ''}`}
+        onClick={() => inputRef.current?.click()}
+        onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={e => { e.preventDefault(); setDragOver(false); addFiles(e.dataTransfer.files); }}
+      >
+        <div><Icon name="upload" size={40} /></div>
+        <h3>Drop PDF files here</h3>
+        <p>or click to browse — only PDF files are supported</p>
+        <input ref={inputRef} type="file" accept=".pdf" multiple style={{ display:'none' }}
+          onChange={e => addFiles(e.target.files)} />
+      </div>
+
+      {files.length > 0 && (
+        <>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+            <span style={{ fontSize:13, color:'var(--text-muted)' }}>{files.length} file{files.length>1?'s':''} queued</span>
+            <button className="btn btn-primary btn-sm" style={{ width:'auto' }}
+              onClick={uploadAll}
+              disabled={!files.some(f => f.status === 'pending')}>
+              <Icon name="upload" size={13} /> Upload all
+            </button>
+          </div>
+          <div className="upload-list">
+            {files.map((f, i) => (
+              <div className="upload-item" key={i}>
+                <div className="upload-item-icon"><Icon name="file" size={18} /></div>
+                <div className="upload-item-info">
+                  <div className="upload-item-name">{f.file.name}</div>
+                  <div className="upload-item-meta">
+                    {fmtSize(f.file.size)}
+                    {f.chunks != null && ` · ${f.chunks} chunks`}
+                    {f.error && ` · ${f.error}`}
+                  </div>
+                  {f.status === 'uploading' && (
+                    <div className="progress-bar"><div className="progress-fill" style={{ width: f.progress+'%' }} /></div>
+                  )}
+                </div>
+                <span className={`status-badge status-${f.status}`}>{f.status}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Delete page ──────────────────────────────────────────────────────────────
+function DeletePage({ token, authToken, toast }) {
+  const [filename, setFilename] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [uploads, setUploads] = useState([]);
+  const [loadingUploads, setLoadingUploads] = useState(true);
+
+  useEffect(() => {
+    if (!authToken) { setLoadingUploads(false); return; }
+    fetch(`${AUTH_URL}/auth/my-uploads`, { headers: { Authorization: `Bearer ${authToken}` } })
+      .then(r => r.json())
+      .then(setUploads)
+      .catch(() => {})
+      .finally(() => setLoadingUploads(false));
+  }, [authToken]);
+
+  const del = async (name) => {
+    if (!name?.trim()) { toast('Enter a filename.', 'error'); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`${RAG_URL}/api/v1/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type':'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ filename: name })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || 'Delete failed');
+      toast(data.message || 'Deleted successfully', 'success');
+      setUploads(p => p.filter(u => u.filename !== name));
+      setFilename('');
+    } catch (e) {
+      toast(e.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 700 }}>
+      <div style={{ marginBottom: 28 }}>
+        <div className="settings-title">Delete by filename</div>
+        <div className="settings-sub" style={{ marginBottom: 12 }}>
+          Remove all Solr chunks associated with a specific PDF filename.
+        </div>
+        <div style={{ display:'flex', gap: 10 }}>
+          <input className="form-input" style={{ flex:1 }}
+            placeholder="e.g. report_2024.pdf"
+            value={filename} onChange={e => setFilename(e.target.value)}
+            onKeyDown={e => e.key==='Enter' && del(filename)} />
+          <button className="btn btn-danger" onClick={() => del(filename)} disabled={loading || !filename.trim()}>
+            <Icon name="trash" size={14} /> {loading ? 'Deleting…' : 'Delete'}
+          </button>
+        </div>
+      </div>
+
+      <div className="divider" />
+      <div className="settings-title" style={{ marginBottom: 4 }}>Your uploaded documents</div>
+      <div className="settings-sub">Documents you've ingested in past sessions.</div>
+
+      {loadingUploads ? (
+        <div className="pulse" style={{ padding: '20px 0' }}><span/><span/><span/></div>
+      ) : uploads.length === 0 ? (
+        <div className="empty-state" style={{ padding: '32px 0' }}>
+          <p>No upload history found.</p>
+        </div>
+      ) : (
+        <div className="doc-list">
+          {uploads.map((u, i) => (
+            <div className="doc-item" key={i}>
+              <div className="upload-item-icon" style={{ width:32, height:32, borderRadius:6, background:'rgba(110,64,201,0.12)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <Icon name="file" size={15} color="var(--accent-glow)" />
+              </div>
+              <div className="doc-item-info">
+                <div className="doc-item-name">{u.filename}</div>
+                <div className="doc-item-meta">{u.chunks} chunks · {new Date(u.uploaded_at).toLocaleDateString()}</div>
+              </div>
+              <button className="btn btn-danger btn-sm" onClick={() => del(u.filename)} disabled={loading}>
+                <Icon name="trash" size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Settings page ─────────────────────────────────────────────────────────────
+function SettingsPage({ user, onLogout }) {
+  return (
+    <div style={{ maxWidth: 600 }}>
+      <div className="settings-section">
+        <div className="settings-title">Account</div>
+        <div className="settings-sub">Your profile details.</div>
+        <div className="settings-row">
+          <div>
+            <div className="settings-row-label">{user.username}</div>
+            <div className="settings-row-sub">{user.email}</div>
+          </div>
+          <span className="tag">Active</span>
+        </div>
+        <div className="settings-row">
+          <div>
+            <div className="settings-row-label">Account ID</div>
+            <div className="settings-row-sub">#{user.id}</div>
+          </div>
+          <span className="tag">SQLite</span>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-title">Endpoints</div>
+        <div className="settings-sub">Backend service URLs — update at top of <span className="code">index.html</span>.</div>
+        <div className="settings-row">
+          <div>
+            <div className="settings-row-label">RAG Server</div>
+            <div className="settings-row-sub" style={{ fontFamily:'var(--mono)', fontSize:11 }}>{RAG_URL}</div>
+          </div>
+          <span className="tag">FastAPI</span>
+        </div>
+        <div className="settings-row">
+          <div>
+            <div className="settings-row-label">Auth Server</div>
+            <div className="settings-row-sub" style={{ fontFamily:'var(--mono)', fontSize:11 }}>{AUTH_URL}</div>
+          </div>
+          <span className="tag">SQLite</span>
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-title">Session</div>
+        <div className="settings-sub">Your JWT token is stored in localStorage.</div>
+        <div className="settings-row">
+          <div>
+            <div className="settings-row-label">Sign out</div>
+            <div className="settings-row-sub">Clears your session token</div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={onLogout}>
+            <Icon name="logout" size={13} /> Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── App shell ────────────────────────────────────────────────────────────────
+function App() {
+  const { user, token, loading, login, register, logout } = useAuth();
+  const [page, setPage] = useState('query');
+  const { toasts, toast } = useToasts();
+  // For auth server calls we reuse the same token (if auth server isn't running, gracefully degrade)
+  const authToken = token;
+
+  if (loading) return (
+    <div style={{ height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)' }}>
+      <div className="pulse"><span/><span/><span/></div>
+    </div>
+  );
+
+  if (!user) return (
+    <>
+      <AuthPage onLogin={login} onRegister={register} />
+      <ToastContainer toasts={toasts} />
+    </>
+  );
+
+  const nav = [
+    { id:'query',    label:'Query',    icon:'search'   },
+    { id:'ingest',   label:'Ingest',   icon:'upload'   },
+    { id:'delete',   label:'Delete',   icon:'trash'    },
+    { id:'settings', label:'Settings', icon:'settings' },
+  ];
+
+  const pageInfo = {
+    query:    { title:'Query Knowledge Base',  sub:'Ask questions about your ingested documents' },
+    ingest:   { title:'Ingest Documents',      sub:'Upload PDF files to the Solr RAG pipeline' },
+    delete:   { title:'Manage Documents',      sub:'Remove documents from the Solr index' },
+    settings: { title:'Settings',              sub:'Account and configuration' },
+  };
+
+  return (
+    <div className="shell">
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <div className="sidebar-logo">⚡</div>
+          <div>
+            <div className="sidebar-brand">OpenDataLoader</div>
+            <div className="sidebar-brand-sub">RAG · SOLR · GROQ</div>
+          </div>
+        </div>
+        <nav className="sidebar-nav">
+          <div className="nav-section-label">Navigation</div>
+          {nav.map(n => (
+            <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`}
+              onClick={() => setPage(n.id)}>
+              <Icon name={n.icon} size={15} />
+              {n.label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <div className="user-pill">
+            <div className="user-avatar">{user.username[0].toUpperCase()}</div>
+            <div className="user-info">
+              <div className="user-name">{user.username}</div>
+              <div className="user-email">{user.email}</div>
+            </div>
+            <button style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-muted)', display:'flex' }}
+              onClick={logout} title="Sign out">
+              <Icon name="logout" size={14} />
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div className="main">
+        <div className="topbar">
+          <div>
+            <div className="page-title">{pageInfo[page].title}</div>
+            <div className="page-sub">{pageInfo[page].sub}</div>
+          </div>
+        </div>
+        <div className="content">
+          {page === 'query'    && <QueryPage  token={token} />}
+          {page === 'ingest'   && <IngestPage token={token} authToken={authToken} toast={toast} />}
+          {page === 'delete'   && <DeletePage token={token} authToken={authToken} toast={toast} />}
+          {page === 'settings' && <SettingsPage user={user} onLogout={logout} />}
+        </div>
+      </div>
+
+      <ToastContainer toasts={toasts} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
