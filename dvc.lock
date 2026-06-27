@@ -1,0 +1,10 @@
+schema: '2.0'
+stages:
+  extract:
+    cmd: python pipeline_run.py extract
+  chunk:
+    cmd: python pipeline_run.py chunk
+  embed:
+    cmd: python pipeline_run.py embed
+  ingest:
+    cmd: python pipeline_run.py ingest

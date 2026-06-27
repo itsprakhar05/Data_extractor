@@ -297,7 +297,10 @@ from sentence_transformers import SentenceTransformer
 import opendataloader_pdf
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+from app.query_rewriter  import rewrite_query  # Uses the same Groq API and model already configured in pipeline.py.
+from app.semantic_cache import SemanticCache
+
+load_dotenv()
 
 log = logging.getLogger("RAG_Pipeline")
 
@@ -309,15 +312,18 @@ class RagPipeline:
         self.solr_url = self.config["solr_url"]
         self.solr = pysolr.Solr(self.solr_url, always_commit=True)
 
-        # ✅ Groq API config
+        # Groq API config
         self.groq_api_key = os.getenv("GROQ_API_KEY")
         self.groq_model = self.config["groq_model"]
         self.groq_url = "https://api.groq.com/openai/v1/chat/completions"
         
-        # ✅ Load embedding model once at startup
+        # Load embedding model once at startup
         log.info("Loading embedding model...")
         self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
         log.info("✅ Embedding model loaded.")
+
+        # ✅ Semantic cache — reuses the same embedder, no extra model load
+        self.cache = SemanticCache(embedder=self.embedder)
 
         Path("data/uploads").mkdir(parents=True, exist_ok=True)
         Path("data/json_chunks").mkdir(parents=True, exist_ok=True)
@@ -349,7 +355,6 @@ class RagPipeline:
         ]
 
         try:
-            # Step 1 — Add vector field type if missing
             type_response = requests.get(f"{schema_url}/fieldtypes", timeout=5)
             existing_types = [t["name"] for t in type_response.json().get("fieldTypes", [])] if type_response.status_code == 200 else []
             
@@ -359,7 +364,6 @@ class RagPipeline:
                 requests.post(schema_url, json=type_payload, timeout=5)
                 log.info("✅ Created vector field type: knn_vector_384")
 
-            # Step 2 — Add fields if missing
             response = requests.get(f"{schema_url}/fields", timeout=5)
             existing_fields = [f["name"] for f in response.json().get("fields", [])] if response.status_code == 200 else []
             fields_to_add = [f for f in required_fields if f["name"] not in existing_fields]
@@ -407,7 +411,6 @@ class RagPipeline:
 
         log.info("[Layer 2] Splitting markdown chunks with table protection...")
 
-        # ✅ Helper to detect markdown table rows
         def is_table_block(block: str) -> bool:
             return any("|" in line for line in block.splitlines())
 
@@ -424,7 +427,6 @@ class RagPipeline:
             block_words = len(block.split())
             is_table = is_table_block(block)
 
-            # ✅ Tables always go as their own isolated chunk — never split
             if is_table:
                 if current_chunk:
                     chunks.append("\n\n".join(current_chunk))
@@ -446,29 +448,27 @@ class RagPipeline:
 
         log.info(f"[Layer 2] Total chunks created: {len(chunks)}")
 
-        # ✅ Build Solr docs with vectors
         solr_docs = []
         for idx, chunk_text in enumerate(chunks):
             if chunk_text.strip():
                 vector = self.embedder.encode(chunk_text).tolist()
 
                 solr_docs.append({
-                    "id":           f"{file_stem}_p0_c{idx}",
-                    "doc_id":       doc_id,
-                    "source_file":  pdf_path.name,
-                    "page_num":     0,
-                    "chunk_index":  idx,
-                    "content":      chunk_text,
+                    "id":             f"{file_stem}_p0_c{idx}",
+                    "doc_id":         doc_id,
+                    "source_file":    pdf_path.name,
+                    "page_num":       0,
+                    "chunk_index":    idx,
+                    "content":        chunk_text,
                     "content_vector": vector,
-                    "char_count":   len(chunk_text),
-                    "metadata":     json.dumps({
+                    "char_count":     len(chunk_text),
+                    "metadata":       json.dumps({
                         "file_type": "pdf",
                         "parser": "native-opendataloader-markdown",
-                        "is_table": is_table_block(chunk_text)  # ✅ Tag table chunks
+                        "is_table": is_table_block(chunk_text)
                     }, ensure_ascii=False)
                 })
 
-        # Save backup
         final_json_path = Path("data/json_chunks") / f"{file_stem}_chunks.json"
         with open(final_json_path, "w", encoding="utf-8") as f:
             json.dump(solr_docs, f, indent=2, ensure_ascii=False)
@@ -476,7 +476,6 @@ class RagPipeline:
         log.info(f"[Layer 3] Uploading {len(solr_docs)} chunks to Solr Core...")
         self.solr.add(solr_docs)
         
-        # Housekeeping
         if extracted_md.exists():
             os.remove(extracted_md)
         if temp_dir.exists() and not os.listdir(temp_dir):
@@ -497,27 +496,42 @@ class RagPipeline:
 
 
     def query_rag_stream(self, user_query: str):
-        # ✅ Step 1 — Convert query to vector
-        query_vector = self.embedder.encode(user_query).tolist()
+        # ✅ Step 1 — Check semantic cache first
+        cached_response, similarity = self.cache.get(user_query)
+        if cached_response:
+            log.info(f"[Cache] Serving cached response (similarity={similarity:.3f})")
+            # Stream the cached response token by token to keep SSE behaviour identical
+            for word in cached_response.split(" "):
+                yield word + " "
+            return
+
+        # ✅ Step 2 — Rewrite query for better retrieval
+        retrieval_query = rewrite_query(
+            original_query=user_query,
+            groq_api_key=self.groq_api_key,
+            groq_model=self.groq_model
+        )
+
+        # ✅ Step 3 — Convert rewritten query to vector
+        query_vector = self.embedder.encode(retrieval_query).tolist()
         vector_str = "[" + ",".join(map(str, query_vector)) + "]"
 
-        # ✅ Step 2 — Vector search (semantic)
+        # ✅ Step 4 — Vector search (semantic)
         search_results = self.solr.search(
             f'{{!knn f=content_vector topK=5}}{vector_str}',
             rows=5
         )
 
-        # ✅ Step 3 — Fallback to keyword search if vector returns nothing
+        # ✅ Step 5 — Fallback to keyword search if vector returns nothing
         if len(search_results) == 0:
             log.warning("Vector search returned nothing, falling back to keyword search...")
-            search_results = self.solr.search(f'content:({user_query})', rows=5)
+            search_results = self.solr.search(f'content:({retrieval_query})', rows=5)
 
-        # ✅ Step 4 — Debug log what Solr returned
         log.info(f"Chunks retrieved: {len(search_results)}")
         for doc in search_results:
             log.debug(f"--- CHUNK ---\n{doc.get('content', '')[:300]}\n")
 
-        # ✅ Step 5 — Build context
+        # ✅ Step 6 — Build context
         context_blocks = []
         for doc in search_results:
             source_info = f"[Source: {doc.get('source_file', 'Unknown')} | Chunk: {doc.get('chunk_index', 0)}]"
@@ -527,7 +541,7 @@ class RagPipeline:
         if not context.strip():
             context = "No specific relevant documentation found."
 
-        # ✅ Step 6 — Table-aware prompt
+        # ✅ Step 7 — Table-aware prompt
         prompt = f"""You are a precise assistant. Answer ONLY using the context below.
 The context may contain markdown tables with | symbols — read them carefully.
 If the answer is in a table, extract and present the relevant rows clearly.
@@ -542,7 +556,7 @@ QUESTION:
 
 ANSWER (if data is in a table, present it clearly):"""
 
-        # ✅ Step 7 — Groq chat completions payload
+        # ✅ Step 8 — Groq streaming payload
         payload = {
             "model": self.groq_model,
             "messages": [
@@ -558,7 +572,9 @@ ANSWER (if data is in a table, present it clearly):"""
             "Content-Type": "application/json"
         }
 
-        # ✅ Step 8 — Stream response (OpenAI-style SSE)
+        # ✅ Step 9 — Stream and collect full response for caching
+        full_response_parts = []
+
         try:
             response = requests.post(self.groq_url, headers=headers, json=payload, timeout=300, stream=True)
             response.raise_for_status()
@@ -579,11 +595,18 @@ ANSWER (if data is in a table, present it clearly):"""
                 delta = chunk.get("choices", [{}])[0].get("delta", {})
                 content = delta.get("content")
                 if content:
+                    full_response_parts.append(content)
                     yield content
 
         except Exception as e:
             log.error(f"Streaming failed: {e}")
             yield f"Error generating response: {str(e)}"
+            return
+
+        # ✅ Step 10 — Cache the complete response
+        if full_response_parts:
+            full_response = "".join(full_response_parts)
+            self.cache.set(user_query, full_response)
 
 
 pipeline = RagPipeline()
