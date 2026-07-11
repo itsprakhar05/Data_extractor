@@ -1,5 +1,4 @@
 {
   "solr_url": "http://localhost:8983/solr/new_open_data",
-  
   "groq_model": "llama-3.3-70b-versatile"
 }

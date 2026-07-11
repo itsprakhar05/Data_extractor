@@ -156,12 +156,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 # ── Routes ────────────────────────────────────────────────────────────────────
 @app.post("/auth/register", response_model=UserOut, status_code=201)
 def register(payload: UserCreate):
+    if not payload.email.lower().endswith("@gmail.com"):
+        raise HTTPException(status_code=400, detail="Only @gmail.com email addresses are allowed.")
     if get_user_by_email(payload.email):
         raise HTTPException(status_code=400, detail="Email already registered.")
     if get_user_by_username(payload.username):
         raise HTTPException(status_code=400, detail="Username already taken.")
     if len(payload.password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
+    if payload.username.lower() in payload.password.lower():
+        raise HTTPException(status_code=400, detail="Password should not contain the username.")
 
     hashed = hash_password(payload.password)
     conn = get_db()
