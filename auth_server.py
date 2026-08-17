@@ -21,8 +21,20 @@ from pydantic import BaseModel, EmailStr
 from jose import JWTError, jwt
 import bcrypt
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
+
 # ── Config ───────────────────────────────────────────────────────────────────
-SECRET_KEY = os.getenv("AUTH_SECRET_KEY", "change-me-in-production-please-use-env-var")
+SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "AUTH_SECRET_KEY is not set. Refusing to start — this secret signs "
+        "every login token issued by this service."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 hours
 DB_PATH = os.getenv("AUTH_DB_PATH", "data/auth.db")
@@ -32,7 +44,7 @@ app = FastAPI(title="RAG Auth Service", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

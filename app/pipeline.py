@@ -43,6 +43,7 @@ class RagPipeline:
         
         required_fields = [
             {"name": "doc_id",          "type": "string",       "stored": True,  "indexed": True},
+            {"name": "user_id",         "type": "string",       "stored": True,  "indexed": True},
             {"name": "source_file",     "type": "string",       "stored": True,  "indexed": True},
             {"name": "page_num",        "type": "pint",         "stored": True,  "indexed": True},
             {"name": "chunk_index",     "type": "pint",         "stored": True,  "indexed": True},
